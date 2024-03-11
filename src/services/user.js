@@ -1,0 +1,20 @@
+const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:3000';
+
+export const user = async (token) => {
+    const response = await fetch(`${BASE_URL}/user/me`, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `${token}`
+        }
+    });
+    const data = await response.json();
+
+    return data;
+}
+
+export const getUsersPoints = async () => {
+    const response = await fetch(`${BASE_URL}/user/points`);
+    const data = await response.json();
+
+    return data;
+}
