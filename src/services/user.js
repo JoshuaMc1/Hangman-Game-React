@@ -18,3 +18,17 @@ export const getUsersPoints = async () => {
 
     return data;
 }
+
+export const updateUserPoints = async (points, token) => {
+    const response = await fetch(`${BASE_URL}/user/points/update`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `${token}`
+        },
+        body: JSON.stringify({ points }),
+    });
+    const data = await response.json();
+
+    return data;
+}

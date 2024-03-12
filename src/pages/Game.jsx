@@ -4,10 +4,14 @@ import {
   livesOptions,
   imagesOptions,
   showClueOptions,
+  pointsMultiplier,
 } from "../utils/config";
 import { useCallback, useEffect, useState } from "react";
 import Loader from "../components/Loader";
 import { getRandom } from "../services/word";
+import { updateUserPoints } from "../services/user";
+import useJwt from "../hooks/useJwt";
+import usePageRefresh from "../hooks/usePageRefresh";
 
 const Game = () => {
   const { username } = useParams();
@@ -21,11 +25,12 @@ const Game = () => {
   const [images, setImages] = useState([]);
   const [heart, setHeart] = useState("");
   const [showClue, setShowClue] = useState(false);
+  const [guessedLetters, setGuessedLetters] = useState([]);
+  const { jwt } = useJwt();
+  const refreshConfirmed = usePageRefresh();
 
   const reset = useCallback(() => {
     setPoints(0);
-    setLives(0);
-    setTime(0);
 
     if (setDifficulty) {
       setDifficulty(null);
@@ -38,13 +43,31 @@ const Game = () => {
     setMessage("El juego se finalizo correctamente. No sumaste puntos.");
   }, [setMessage, reset]);
 
-  // const loseLife = () => {
-  //   setLives(lives - 1);
-  // };
+  const loseLife = () => {
+    setLives((prevLives) => prevLives - 1);
+  };
 
-  // const addPoints = () => {
-  //   setPoints(points + pointsMultiplier[difficulty]);
-  // };
+  const addPoints = () => {
+    setPoints((prevPoints) => prevPoints + pointsMultiplier[difficulty]);
+  };
+
+  const winGame = useCallback(async () => {
+    reset();
+
+    const updatePoints = async () => {
+      if (points > 0) {
+        return await updateUserPoints(points, jwt);
+      }
+
+      return null;
+    };
+
+    await updatePoints();
+
+    setMessage("Ganaste. Sumaste " + points + " puntos.");
+
+    setGoToDashboard(true);
+  }, [setGoToDashboard, reset, setMessage, points, jwt]);
 
   const endGame = useCallback(() => {
     reset();
@@ -114,6 +137,38 @@ const Game = () => {
     }
   }, [lives, endGame, time]);
 
+  const handleLetterGuess = (letter) => {
+    if (!guessedLetters.includes(letter)) {
+      setGuessedLetters([...guessedLetters, letter]);
+
+      word.word.includes(letter) ? addPoints() : loseLife();
+    }
+  };
+
+  useEffect(() => {
+    if (word) {
+      const wordGuessed = word.word
+        .split("")
+        .every((char) => guessedLetters.includes(char));
+
+      if (wordGuessed) {
+        winGame();
+      }
+    }
+  }, [guessedLetters, word, winGame]);
+
+  useEffect(() => {
+    if (refreshConfirmed) {
+      setMessage(
+        "El juego se finalizo debido a que la página se actualizo. No sumaste ni restaste puntos.",
+      );
+
+      reset();
+
+      setGoToDashboard(true);
+    }
+  }, [refreshConfirmed, setMessage, setGoToDashboard, reset]);
+
   return (
     <>
       {loading ? (
@@ -123,7 +178,7 @@ const Game = () => {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 p-2 lg:grid-cols-5">
+        <div className="animate__animated animate__fadeIn grid grid-cols-1 gap-4 p-2 lg:grid-cols-5">
           {goToDashboard && <Navigate to="/dashboard" replace={true} />}
           <div className="lg:col-span-5">
             <div className="card w-full bg-base-200 shadow-xl">
@@ -158,8 +213,10 @@ const Game = () => {
                     {word.word.split("").map((letter, index) => (
                       <div
                         key={index}
-                        className="w-10 border-b-2 border-primary"
-                      ></div>
+                        className="w-10 border-b-2 border-primary text-center text-3xl font-bold"
+                      >
+                        {guessedLetters.includes(letter) ? letter : ""}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -168,7 +225,7 @@ const Game = () => {
           </div>
           <div className="flex flex-row gap-4 lg:col-span-2 lg:flex-col">
             {showClue && (
-              <div className="card h-[300px] bg-base-200 shadow-xl">
+              <div className="animate__animated animate__fadeIn card h-[300px] bg-base-200 shadow-xl">
                 <div className="card-body">
                   <h3 className="text-2xl font-bold">Pistas</h3>
                   <div className="flex flex-col gap-2" id="hints">
@@ -181,36 +238,172 @@ const Game = () => {
               <div className="card-body">
                 <div className="flex flex-col items-center justify-center gap-4">
                   <div className="flex flex-wrap justify-center gap-2 md:flex-row">
-                    <button className="btn btn-accent">Q</button>
-                    <button className="btn btn-accent">W</button>
-                    <button className="btn btn-accent">E</button>
-                    <button className="btn btn-accent">R</button>
-                    <button className="btn btn-accent">T</button>
-                    <button className="btn btn-accent">Y</button>
-                    <button className="btn btn-accent">U</button>
-                    <button className="btn btn-accent">I</button>
-                    <button className="btn btn-accent">O</button>
-                    <button className="btn btn-accent">P</button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("Q")}
+                    >
+                      Q
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("W")}
+                    >
+                      W
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("E")}
+                    >
+                      E
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("R")}
+                    >
+                      R
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("T")}
+                    >
+                      T
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("Y")}
+                    >
+                      Y
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("U")}
+                    >
+                      U
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("I")}
+                    >
+                      I
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("O")}
+                    >
+                      O
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("P")}
+                    >
+                      P
+                    </button>
                   </div>
                   <div className="flex flex-wrap justify-center gap-2 md:flex-row">
-                    <button className="btn btn-accent">A</button>
-                    <button className="btn btn-accent">S</button>
-                    <button className="btn btn-accent">D</button>
-                    <button className="btn btn-accent">F</button>
-                    <button className="btn btn-accent">G</button>
-                    <button className="btn btn-accent">H</button>
-                    <button className="btn btn-accent">J</button>
-                    <button className="btn btn-accent">K</button>
-                    <button className="btn btn-accent">L</button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("A")}
+                    >
+                      A
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("S")}
+                    >
+                      S
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("D")}
+                    >
+                      D
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("F")}
+                    >
+                      F
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("G")}
+                    >
+                      G
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("H")}
+                    >
+                      H
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("J")}
+                    >
+                      J
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("K")}
+                    >
+                      K
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("L")}
+                    >
+                      L
+                    </button>
                   </div>
                   <div className="flex flex-wrap justify-center gap-2 md:flex-row">
-                    <button className="btn btn-accent">Z</button>
-                    <button className="btn btn-accent">X</button>
-                    <button className="btn btn-accent">C</button>
-                    <button className="btn btn-accent">V</button>
-                    <button className="btn btn-accent">B</button>
-                    <button className="btn btn-accent">N</button>
-                    <button className="btn btn-accent">M</button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("Z")}
+                    >
+                      Z
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("X")}
+                    >
+                      X
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("C")}
+                    >
+                      C
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("V")}
+                    >
+                      V
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("B")}
+                    >
+                      B
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("N")}
+                    >
+                      N
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("Ñ")}
+                    >
+                      Ñ
+                    </button>
+                    <button
+                      className="btn btn-accent"
+                      onClick={() => handleLetterGuess("M")}
+                    >
+                      M
+                    </button>
                   </div>
                 </div>
               </div>

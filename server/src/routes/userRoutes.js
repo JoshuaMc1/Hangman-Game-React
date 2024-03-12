@@ -27,10 +27,13 @@ router.get('/points', async (req, res) => {
     }
 });
 
-router.put('/point/update', async (req, res) => {
+router.post('/points/update', async (req, res) => {
+    console.log(req.body);
+
     const { points } = req.body;
 
     const userData = await user(req.headers.authorization);
+
     const id = userData[0].id;
 
     if (!userData) {

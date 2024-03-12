@@ -46,4 +46,21 @@ const showClueOptions = {
     hard: 1
 }
 
-export { difficultyOptions, pointsMultiplier, livesOptions, imagesOptions, showClueOptions };
+const removeAccents = (word) => {
+    const accentsMap = {
+        'á': 'a',
+        'é': 'e',
+        'í': 'i',
+        'ó': 'o',
+        'ú': 'u',
+        'Á': 'A',
+        'É': 'E',
+        'Í': 'I',
+        'Ó': 'O',
+        'Ú': 'U'
+    };
+
+    return word.replace(/[áéíóúÁÉÍÓÚ]/g, (match) => accentsMap[match] || match);
+};
+
+export { difficultyOptions, pointsMultiplier, livesOptions, imagesOptions, showClueOptions, removeAccents };
