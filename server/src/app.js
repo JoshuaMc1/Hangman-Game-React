@@ -1,15 +1,13 @@
 const express = require('express');
-const dotenv = require('dotenv');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const wordRoutes = require('./routes/wordRoutes');
 const morgan = require('morgan');
-
-dotenv.config();
+const config = require('./config');
 
 const app = express();
 
-app.use(morgan(process.env.APP_ENV || 'dev'));
+app.use(morgan(config.app.env));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -31,8 +29,6 @@ app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 app.use('/word', wordRoutes);
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-    console.log(`Server running on port http://localhost:${PORT}`);
+app.listen(config.app.port, () => {
+    console.log(`Server running on port http://localhost:${config.app.port}`);
 });

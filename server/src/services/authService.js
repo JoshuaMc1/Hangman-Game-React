@@ -1,8 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const config = require('../config');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'mysecretkey';
+const JWT_SECRET = config.secret;
 
 async function register(username, password) {
     const existingUser = await User.findByUsername(username);
