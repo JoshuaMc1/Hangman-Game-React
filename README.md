@@ -1,5 +1,7 @@
 # Juego del Ahorcado
 
+![Captura de pantalla del juego](screenshot.png)
+
 Este proyecto es un juego de ahorcado desarrollado con Node.js, Express, React, Vite, TailwindCSS, DaisyUI, MySQL y Json Web Token.
 
 ## Características
@@ -17,21 +19,21 @@ Este proyecto es un juego de ahorcado desarrollado con Node.js, Express, React, 
 
 ### Vidas:
 
-|    Facil    |    Medio    |    Dificil    |
-|-------------|-------------|---------------|
-|   6 Vidas   |   4 Vidas   |    2 Vidas    |
+| Facil   | Medio   | Dificil |
+| ------- | ------- | ------- |
+| 6 Vidas | 4 Vidas | 2 Vidas |
 
 ### Puntos:
 
-|          Facil          |          Medio          |           Dificil         |
-|-------------------------|-------------------------|---------------------------|
-|   1 Punto por acierto   |   2 Punto por acierto   |    3 Punto por acierto    |
-  
+| Facil               | Medio               | Dificil             |
+| ------------------- | ------------------- | ------------------- |
+| 1 Punto por acierto | 2 Punto por acierto | 3 Punto por acierto |
+
 ### Pistas:
 
-|         Facil         |         Medio         |          Dificil        |
-|-----------------------|-----------------------|-------------------------|
-|   al perder 3 vidas   |   al perder 2 vidas   |    al perder 1 vidas    |
+| Facil             | Medio             | Dificil           |
+| ----------------- | ----------------- | ----------------- |
+| al perder 3 vidas | al perder 2 vidas | al perder 1 vidas |
 
 ## Tecnologías Utilizadas
 
