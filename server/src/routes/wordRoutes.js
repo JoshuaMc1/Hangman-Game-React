@@ -1,5 +1,5 @@
 const express = require('express');
-const { random, all, create } = require('../services/wordService');
+const { random, all, createWord } = require('../services/wordService');
 
 const router = express.Router();
 
@@ -43,7 +43,7 @@ router.post('/create', async (req, res) => {
         return res.status(400).json({ success: false, message: 'Pista no encontrada' });
     }
 
-    const newWord = await create(word, difficulty, time, clue);
+    const newWord = await createWord(word, difficulty, time, clue);
 
     res.status(201).json({ success: true, message: 'Palabra creada correctamente.', data: newWord });
 })

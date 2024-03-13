@@ -1,13 +1,14 @@
 const mysql = require('mysql');
 const { promisify } = require('util');
+const config = require('./config');
 
 const pool = mysql.createPool({
     connectionLimit: 10,
-    port: process.env.DB_PORT || 3306,
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'hangman_db',
+    port: config.mysql.port,
+    host: config.mysql.host,
+    user: config.mysql.user,
+    password: config.mysql.password,
+    database: config.mysql.database,
     multipleStatements: true,
     waitForConnections: true,
     queueLimit: 0
