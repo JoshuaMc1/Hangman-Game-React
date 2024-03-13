@@ -12,8 +12,6 @@ class Word {
     async create(word, difficulty, time, clue) {
         let res = await db.query('INSERT INTO words (word, difficulty, time, clue) VALUES (?, ?, ?, ?)', [word, difficulty, time, clue]);
 
-        await this.deleteRepeats();
-
         return res;
     }
 

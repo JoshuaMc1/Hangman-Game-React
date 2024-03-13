@@ -1,11 +1,83 @@
-import { Suspense, useEffect, useState } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { Suspense, useEffect, useRef, useState } from "react";
 import logo from "../assets/img/logo.png";
-import { Navigate, useOutletContext } from "react-router-dom";
+import {
+  Form,
+  Navigate,
+  useActionData,
+  useOutletContext,
+} from "react-router-dom";
 import PropTypes from "prop-types";
 import useJwt from "../hooks/useJwt";
 import { user, getUsersPoints } from "../services/user";
 import Loader from "../components/Loader";
 import Alert from "../components/Alert";
+import { create } from "../services/word";
+
+export async function action({ request }) {
+  let formData = await request.formData();
+  let { word, difficulty, time, clue } = Object.fromEntries(formData);
+
+  if (!word) {
+    return {
+      status: false,
+      message: "El campo de palabra es requerido.",
+    };
+  }
+
+  if (word.length < 3) {
+    return {
+      status: false,
+      message: "La palabra debe tener al menos 3 caracteres.",
+    };
+  }
+
+  if (word.length > 250) {
+    return {
+      status: false,
+      message: "La palabra debe tener menos de 250 caracteres.",
+    };
+  }
+
+  if (!difficulty) {
+    return {
+      status: false,
+      message: "El campo de dificultad es requerido.",
+    };
+  }
+
+  if (!time) {
+    return {
+      status: false,
+      message: "El campo de tiempo es requerido.",
+    };
+  }
+
+  if (time < 0) {
+    return {
+      status: false,
+      message: "El tiempo no puede ser negativo.",
+    };
+  }
+
+  if (!clue) {
+    return {
+      status: false,
+      message: "El campo de pistas es requerido.",
+    };
+  }
+
+  if (clue.length < 3) {
+    return {
+      status: false,
+      message: "Las pistas deben tener al menos 3 caracteres.",
+    };
+  }
+
+  const response = await create(word, difficulty, time, clue);
+
+  return response;
+}
 
 const Dashboard = ({ logout }) => {
   const [goToLogin, setGoToLogin] = useState(false);
@@ -13,12 +85,17 @@ const Dashboard = ({ logout }) => {
   const [userData, setUserData] = useState(null);
   const [points, setPoints] = useState([]);
   const [showError, setShowError] = useState(false);
+  const [showResponse, setShowResponse] = useState(false);
+  const [responseMessage, setResponseMessage] = useState("");
+  const [responseType, setResponseType] = useState("");
   const [errorType, setErrorType] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [showMessage, setShowMessage] = useState(false);
   const { jwt } = useJwt();
   const { setDifficulty } = useOutletContext();
   const { message, setMessage } = useOutletContext();
+  const modalRef = useRef(null);
+  const response = useActionData();
 
   useEffect(() => {
     if (!localStorage.getItem("jwt")) {
@@ -57,6 +134,14 @@ const Dashboard = ({ logout }) => {
     }
   }, [message]);
 
+  useEffect(() => {
+    if (response) {
+      setResponseMessage(response.message);
+      setResponseType(response.success ? "success" : "error");
+      setShowResponse(true);
+    }
+  }, [response]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -77,6 +162,16 @@ const Dashboard = ({ logout }) => {
     setShowMessage(false);
     setErrorMessage("");
     setMessage("");
+  };
+
+  const handleCloseResponse = () => {
+    setShowResponse(false);
+    setResponseMessage("");
+    setResponseType("");
+  };
+
+  const onOpenModal = () => {
+    modalRef.current.showModal();
   };
 
   return (
@@ -124,12 +219,17 @@ const Dashboard = ({ logout }) => {
                   <kbd className="kbd kbd-md">{userData?.points}</kbd>
                 </div>
               </div>
-              <div className="mt-6 flex justify-center">
+              <div className="mt-6 flex flex-col justify-center gap-2">
+                <button
+                  className="btn btn-outline btn-primary w-full"
+                  onClick={onOpenModal}
+                >
+                  Agregar nueva palabra
+                </button>
                 <button
                   className="btn btn-outline btn-accent w-full"
                   onClick={() => {
                     logout();
-
                     setGoToLogin(true);
                   }}
                 >
@@ -214,6 +314,85 @@ const Dashboard = ({ logout }) => {
           </div>
         </div>
       </div>
+      <dialog id="md1" className="modal" ref={modalRef}>
+        <div className="modal-box">
+          <h3 className="text-lg font-bold">Crear nueva palabra</h3>
+          <div className="py-4">
+            {showResponse && (
+              <Alert
+                type={responseType}
+                message={responseMessage}
+                action={handleCloseResponse}
+                showAction={true}
+              />
+            )}
+            <Form method="POST" noValidate>
+              <div className="form-control">
+                <label className="label" htmlFor="word">
+                  <span className="label-text">Palabra</span>
+                </label>
+                <input
+                  className="input input-bordered input-primary"
+                  id="word"
+                  name="word"
+                  type="text"
+                  placeholder="Casa"
+                />
+              </div>
+              <div className="form-control">
+                <label className="label" htmlFor="clue">
+                  <span className="label-text">Pista</span>
+                </label>
+                <textarea
+                  className="textarea textarea-bordered textarea-primary"
+                  name="clue"
+                  id="clue"
+                  placeholder="Lugar donde vives"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div className="form-control">
+                <label className="label" htmlFor="difficulty">
+                  <span className="label-text">Dificultad</span>
+                </label>
+                <select
+                  id="difficulty"
+                  className="select select-bordered select-primary"
+                  name="difficulty"
+                  defaultValue={""}
+                >
+                  <option value={""}>Seleccione la dificultad</option>
+                  <option value={"easy"}>Fácil</option>
+                  <option value={"medium"}>Medio</option>
+                  <option value={"hard"}>Difícil</option>
+                </select>
+              </div>
+              <div className="form-control">
+                <label htmlFor="time" className="label">
+                  <span className="label-text">Tiempo</span>
+                </label>
+                <input
+                  type="number"
+                  id="time"
+                  name="time"
+                  className="input input-bordered input-primary"
+                  placeholder="400"
+                />
+              </div>
+              <div className="form-control mt-6">
+                <button className="btn btn-primary w-full" type="submit">
+                  Crear
+                </button>
+              </div>
+            </Form>
+          </div>
+          <div className="modal-action">
+            <form method="dialog">
+              <button className="btn">Cancelar</button>
+            </form>
+          </div>
+        </div>
+      </dialog>
     </>
   );
 };

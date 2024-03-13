@@ -14,3 +14,16 @@ export const getAll = async () => {
 
     return data;
 }
+
+export const create = async (word, difficulty, time, clue) => {
+    const response = await fetch(`${BASE_URL}/word/create`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ word, difficulty, time, clue }),
+    });
+    const data = await response.json();
+
+    return data;
+}
