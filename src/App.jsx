@@ -2,7 +2,7 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import Layout from "./components/Layout";
 import Index, { action as indexAction } from "./pages/Index";
 import Error from "./pages/Error";
-import Dashboard from "./pages/Dashboard";
+import Dashboard, { action as dashboardAction } from "./pages/Dashboard";
 import useJwt from "./hooks/useJwt";
 import Game from "./pages/Game";
 import { useState } from "react";
@@ -40,6 +40,7 @@ function App() {
           path: "/dashboard",
           element: <Dashboard logout={logout} />,
           errorElement: <Error />,
+          action: dashboardAction,
         },
         {
           path: "/game/:username",
