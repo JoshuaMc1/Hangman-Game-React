@@ -45,7 +45,7 @@ Este proyecto es un juego de ahorcado desarrollado con Node.js, Express, React, 
 
 ## Instalación
 
-1. Clona este repositorio: `git https://github.com/JoshuaMc1/Hangman-Game-React.git`
+1. Clona este repositorio: `git clone https://github.com/JoshuaMc1/Hangman-Game-React.git`
 2. Instala las dependencias del backend: `cd server && npm install`
 3. Instala las dependencias del frontend: `npm install`
 4. Configura tu base de datos MySQL y establece las credenciales en el archivo de configuración `.env` dentro del directorio `server`.
