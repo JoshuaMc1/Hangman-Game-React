@@ -12,8 +12,12 @@ import { getRandom } from "../services/word";
 import { updateUserPoints } from "../services/user";
 import useJwt from "../hooks/useJwt";
 import usePageRefresh from "../hooks/usePageRefresh";
+import ReactHowler from "react-howler";
+import winsong from "../assets/audio/winsong.mp3";
+import losesong from "../assets/audio/losesong.mp3";
+import PropTypes from "prop-types";
 
-const Game = () => {
+const Game = ({ setPlayWinSongFinish, setPlayLoseSongFinish }) => {
   const { username } = useParams();
   const { difficulty, setDifficulty, setMessage } = useOutletContext();
   const [points, setPoints] = useState(0);
@@ -28,6 +32,8 @@ const Game = () => {
   const [guessedLetters, setGuessedLetters] = useState([]);
   const { jwt } = useJwt();
   const refreshConfirmed = usePageRefresh();
+  const [playLoseSong, setPlayLoseSong] = useState(false);
+  const [playWinSong, setPlayWinSong] = useState(false);
 
   const reset = useCallback(() => {
     setPoints(0);
@@ -45,10 +51,12 @@ const Game = () => {
 
   const loseLife = () => {
     setLives((prevLives) => prevLives - 1);
+    setPlayLoseSong(true);
   };
 
   const addPoints = () => {
     setPoints((prevPoints) => prevPoints + pointsMultiplier[difficulty]);
+    setPlayWinSong(true);
   };
 
   const winGame = useCallback(async () => {
@@ -66,8 +74,10 @@ const Game = () => {
 
     setMessage("Ganaste. Sumaste " + points + " puntos.");
 
+    setPlayWinSongFinish(true);
+
     setGoToDashboard(true);
-  }, [setGoToDashboard, reset, setMessage, points, jwt]);
+  }, [setGoToDashboard, reset, setMessage, points, jwt, setPlayWinSongFinish]);
 
   const endGame = useCallback(() => {
     reset();
@@ -76,8 +86,10 @@ const Game = () => {
       "Perdiste. No tenes suficientes vidas o el tiempo ha terminado.",
     );
 
+    setPlayLoseSongFinish(true);
+
     setGoToDashboard(true);
-  }, [setGoToDashboard, reset, setMessage]);
+  }, [setGoToDashboard, reset, setMessage, setPlayLoseSongFinish]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -180,6 +192,27 @@ const Game = () => {
       ) : (
         <div className="animate__animated animate__fadeIn grid grid-cols-1 gap-4 p-2 lg:grid-cols-5">
           {goToDashboard && <Navigate to="/dashboard" replace={true} />}
+
+          {playLoseSong && (
+            <ReactHowler
+              src={losesong}
+              playing={playLoseSong}
+              loop={false}
+              volume={0.4}
+              onEnd={() => setPlayLoseSong(false)}
+            />
+          )}
+
+          {playWinSong && (
+            <ReactHowler
+              src={winsong}
+              playing={playWinSong}
+              loop={false}
+              volume={0.4}
+              onEnd={() => setPlayWinSong(false)}
+            />
+          )}
+
           <div className="lg:col-span-5">
             <div className="card w-full bg-base-200 shadow-xl">
               <div className="card-body">
@@ -439,6 +472,11 @@ const Game = () => {
       )}
     </>
   );
+};
+
+Game.propTypes = {
+  setPlayLoseSongFinish: PropTypes.func.isRequired,
+  setPlayWinSongFinish: PropTypes.func.isRequired,
 };
 
 export default Game;

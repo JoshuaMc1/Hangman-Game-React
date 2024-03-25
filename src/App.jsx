@@ -12,6 +12,8 @@ function App() {
   const { removeJwt } = useJwt();
   const [difficulty, setDifficulty] = useState(null);
   const [message, setMessage] = useState("");
+  const [playWinSong, setPlayWinSong] = useState(false);
+  const [playLoseSong, setPlayLoseSong] = useState(false);
 
   const logout = () => {
     removeJwt();
@@ -39,13 +41,26 @@ function App() {
         },
         {
           path: "/dashboard",
-          element: <Dashboard logout={logout} />,
+          element: (
+            <Dashboard
+              logout={logout}
+              setPlayLoseSongFinish={setPlayLoseSong}
+              setPlayWinSongFinish={setPlayWinSong}
+              playLoseSongFinish={playLoseSong}
+              playWinSongFinish={playWinSong}
+            />
+          ),
           errorElement: <Error />,
           action: dashboardAction,
         },
         {
           path: "/game/:username",
-          element: <Game />,
+          element: (
+            <Game
+              setPlayWinSongFinish={setPlayWinSong}
+              setPlayLoseSongFinish={setPlayLoseSong}
+            />
+          ),
           errorElement: <Error />,
         },
         {

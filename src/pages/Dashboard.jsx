@@ -13,6 +13,9 @@ import { user, getUsersPoints } from "../services/user";
 import Loader from "../components/Loader";
 import Alert from "../components/Alert";
 import { create } from "../services/word";
+import ReactHowler from "react-howler";
+import winSongFinish from "../assets/audio/winsong-finish.mp3";
+import loseSongFinish from "../assets/audio/losesong-finish.mp3";
 
 export async function action({ request }) {
   let formData = await request.formData();
@@ -79,7 +82,13 @@ export async function action({ request }) {
   return response;
 }
 
-const Dashboard = ({ logout }) => {
+const Dashboard = ({
+  logout,
+  playLoseSongFinish,
+  playWinSongFinish,
+  setPlayLoseSongFinish,
+  setPlayWinSongFinish,
+}) => {
   const [goToLogin, setGoToLogin] = useState(false);
   const [goToGame, setGoToGame] = useState(false);
   const [userData, setUserData] = useState(null);
@@ -177,6 +186,26 @@ const Dashboard = ({ logout }) => {
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {playWinSongFinish && (
+          <ReactHowler
+            src={winSongFinish}
+            playing={playWinSongFinish}
+            loop={false}
+            volume={0.7}
+            onEnd={() => setPlayWinSongFinish(false)}
+          />
+        )}
+
+        {playLoseSongFinish && (
+          <ReactHowler
+            src={loseSongFinish}
+            playing={playLoseSongFinish}
+            loop={false}
+            volume={0.7}
+            onEnd={() => setPlayLoseSongFinish(false)}
+          />
+        )}
+
         {goToLogin && <Navigate to="/" />}
 
         {goToGame && <Navigate to={`/game/${userData?.username}`} />}
@@ -185,7 +214,7 @@ const Dashboard = ({ logout }) => {
           <div className="card-body">
             <div className="flex justify-center">
               <div className="avatar">
-                <div className="w-32 rounded-full bg-secondary-content p-2">
+                <div className="w-16 rounded-full bg-secondary-content p-2">
                   <img src={logo} alt="logo" />
                 </div>
               </div>
@@ -399,6 +428,10 @@ const Dashboard = ({ logout }) => {
 
 Dashboard.propTypes = {
   logout: PropTypes.func.isRequired,
+  setPlayLoseSongFinish: PropTypes.func.isRequired,
+  setPlayWinSongFinish: PropTypes.func.isRequired,
+  playLoseSongFinish: PropTypes.bool.isRequired,
+  playWinSongFinish: PropTypes.bool.isRequired,
 };
 
 export default Dashboard;
