@@ -1,11 +1,7 @@
-import { Link, useRouteError } from "react-router-dom";
+import { Link } from "react-router-dom";
 import logo from "../assets/img/logo.png";
 
-const Error = () => {
-  const error = useRouteError();
-
-  console.log(error);
-
+const Page404 = () => {
   return (
     <>
       <div className="card bg-base-300 shadow-xl">
@@ -17,15 +13,10 @@ const Error = () => {
               </div>
             </div>
           </div>
-          <h1 className="text-5xl font-bold">¡Vaya!</h1>
-          <p className="text-center text-xl">
-            Lo sentimos, al parecer a ocurrido un error. Vuelve a intentarlo mas
-            tarde.
-          </p>
-
-          <p className="text-center text-lg text-error">
-            {error.statusText || error.message}
-          </p>
+          <h1 className="text-5xl font-bold">
+            Oops! - <span className="text-error">404</span>
+          </h1>
+          <p className="text-center text-xl">Página no encontrada</p>
           <div className="card-actions justify-end">
             <Link to="/" className="btn btn-primary">
               Volver al inicio
@@ -37,4 +28,4 @@ const Error = () => {
   );
 };
 
-export default Error;
+export default Page404;
