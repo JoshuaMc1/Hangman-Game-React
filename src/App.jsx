@@ -5,6 +5,7 @@ import Error from "./pages/Error";
 import Dashboard, { action as dashboardAction } from "./pages/Dashboard";
 import useJwt from "./hooks/useJwt";
 import Game from "./pages/Game";
+import Page404 from "./pages/Page404";
 import { useState } from "react";
 
 function App() {
@@ -46,6 +47,10 @@ function App() {
           path: "/game/:username",
           element: <Game />,
           errorElement: <Error />,
+        },
+        {
+          path: "*",
+          element: <Page404 />,
         },
       ],
     },
